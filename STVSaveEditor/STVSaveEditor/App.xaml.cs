@@ -10,7 +10,9 @@ public partial class App : Application
         if (warning.ShowDialog() == true)
         {
             var main = new MainWindow();
+            MainWindow = main;
             main.Show();
+            ShutdownMode = ShutdownMode.OnMainWindowClose;
         }
         else
         {
