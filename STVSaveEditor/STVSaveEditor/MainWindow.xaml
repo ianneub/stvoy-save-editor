@@ -1,0 +1,8 @@
+<Window x:Class="STVSaveEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="STV Save Editor" Width="800" Height="700">
+    <Grid>
+        <TextBlock Text="Loading..." HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Grid>
+</Window>

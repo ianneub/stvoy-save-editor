@@ -1,0 +1,61 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore STVSaveEditor/STVSaveEditor.sln
+
+    - name: Build
+      run: dotnet build STVSaveEditor/STVSaveEditor.sln --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test STVSaveEditor/STVSaveEditor.sln --configuration Release --no-build --verbosity normal
+
+    - name: Publish
+      run: dotnet publish STVSaveEditor/STVSaveEditor/STVSaveEditor.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: STVSaveEditor-win-x64
+        path: publish/STVSaveEditor.exe
+
+  release:
+    needs: build-and-test
+    runs-on: windows-latest
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Publish
+      run: dotnet publish STVSaveEditor/STVSaveEditor/STVSaveEditor.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish/
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        files: publish/STVSaveEditor.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
