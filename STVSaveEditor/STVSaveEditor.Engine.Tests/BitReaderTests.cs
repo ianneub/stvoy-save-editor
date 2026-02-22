@@ -29,7 +29,7 @@ public class BitReaderTests
     [Fact]
     public void ReadBits_CrossesByteBoundary()
     {
-        var reader = new BitReader(new byte[] { 0x0F, 0xF0 }, pos: 4);
+        var reader = new BitReader(new byte[] { 0xF0, 0x0F }, pos: 4);
         Assert.Equal(0xFF, reader.ReadBits(8));
     }
 
