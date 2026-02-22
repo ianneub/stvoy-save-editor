@@ -1,0 +1,103 @@
+<Window x:Class="STVSaveEditor.WarningDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Warning"
+        Width="480" Height="340"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        Background="#FF1B1B2F"
+        AllowsTransparency="True">
+
+    <Border BorderBrush="#FF4A4A6A" BorderThickness="1" CornerRadius="8">
+        <Grid Margin="28,24,28,20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0">
+                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#FFE0C070"
+                           FontFamily="Consolas">
+                    <Run Text="&#x26A0;"/> <Run Text="Warning"/>
+                </TextBlock>
+                <Border Height="2" Margin="0,8,0,16">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#FFE0C070" Offset="0"/>
+                            <GradientStop Color="#FF3A6EA5" Offset="0.5"/>
+                            <GradientStop Color="Transparent" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+            </StackPanel>
+
+            <!-- Warning Text -->
+            <StackPanel Grid.Row="2">
+                <TextBlock Foreground="#FFEEEEFF" FontSize="13" TextWrapping="Wrap" LineHeight="20"
+                           Text="This tool modifies game save files directly. Editing saves can corrupt them and cause data loss. Always keep backups of your save files before making changes."/>
+
+                <TextBlock Foreground="#FFCCCCDD" FontSize="12" TextWrapping="Wrap" LineHeight="18"
+                           Margin="0,12,0,0"
+                           Text="A backup is created automatically the first time you save, but you should also manually back up your entire SaveGames folder."/>
+
+                <TextBlock Foreground="#FF8888AA" FontSize="11" TextWrapping="Wrap" LineHeight="16"
+                           Margin="0,16,0,0"
+                           Text="This project is not affiliated with or endorsed by Stellar Cartography, Strange New Games, or any rights holders of Star Trek or Star Trek Voyager: Across the Unknown."/>
+            </StackPanel>
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button Content="Quit" Click="Quit_Click"
+                        Background="#FF555577" Foreground="#FFCCCCDD"
+                        FontSize="13" Padding="16,8" BorderThickness="0" Cursor="Hand"
+                        Margin="0,0,10,0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="{TemplateBinding Background}"
+                                    CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#FF666688"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#FF444466"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button Content="I Understand" Click="Understand_Click" IsDefault="True"
+                        Foreground="White" FontSize="13" FontWeight="SemiBold"
+                        Padding="20,8" BorderThickness="0" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#FFE0C070" Offset="0"/>
+                                        <GradientStop Color="#FF3A6EA5" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Opacity" Value="0.85"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
