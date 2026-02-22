@@ -1,8 +1,11 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using STVSaveEditor.Engine;
 
 namespace STVSaveEditor.ViewModels;
@@ -13,6 +16,7 @@ public class MainViewModel : INotifyPropertyChanged
     private string _selectedFile = "";
     private string _statusMessage = "Ready";
     private float _hullIntegrity;
+    private float _hullMax = 490f;
     private byte[]? _currentData;
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -34,13 +38,31 @@ public class MainViewModel : INotifyPropertyChanged
     public string StatusMessage
     {
         get => _statusMessage;
-        set { _statusMessage = value; OnPropertyChanged(); }
+        set { _statusMessage = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusBrush)); }
+    }
+
+    public Brush StatusBrush
+    {
+        get
+        {
+            if (_statusMessage.StartsWith("Error"))
+                return new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x6B));
+            if (_statusMessage.StartsWith("Saved"))
+                return new SolidColorBrush(Color.FromRgb(0x66, 0xBB, 0x6A));
+            return new SolidColorBrush(Color.FromRgb(0xCC, 0xCC, 0xDD));
+        }
     }
 
     public float HullIntegrity
     {
         get => _hullIntegrity;
         set { _hullIntegrity = value; OnPropertyChanged(); }
+    }
+
+    public float HullMax
+    {
+        get => _hullMax;
+        set { _hullMax = value; OnPropertyChanged(); }
     }
 
     public ObservableCollection<ResourceViewModel> BaseResources { get; } = new();
@@ -173,11 +195,26 @@ public class ResourceViewModel : INotifyPropertyChanged
     public int NewQuantity
     {
         get => _newQuantity;
-        set { _newQuantity = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewQuantity))); }
+        set
+        {
+            _newQuantity = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NewQuantity)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsModified)));
+        }
     }
+    public bool IsModified => NewQuantity != Quantity;
     public bool IsItem { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+}
+
+public class FilePathToNameConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is string path ? Path.GetFileName(path) : value;
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotSupportedException();
 }
 
 public class RelayCommand : ICommand
