@@ -39,6 +39,21 @@
             <Setter Property="Width" Value="90"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
         </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="#FF1B1B2F"/>
+            <Setter Property="Foreground" Value="#FFEEEEFF"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#FF2D2D44"/>
+            <Setter Property="Foreground" Value="#FFEEEEFF"/>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="#FF3A6EA5"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="ActionButton" TargetType="Button">
             <Setter Property="Background" Value="#FF3A6EA5"/>
             <Setter Property="Foreground" Value="White"/>
@@ -78,9 +93,7 @@
                 <TextBlock Text="Save File:" Style="{StaticResource LabelText}" Margin="0,0,8,0"/>
                 <ComboBox Grid.Column="1"
                           ItemsSource="{Binding SaveFiles}"
-                          SelectedItem="{Binding SelectedFile}"
-                          Background="#FF1B1B2F" Foreground="#FFEEEEFF"
-                          FontSize="12"/>
+                          SelectedItem="{Binding SelectedFile}"/>
                 <Button Grid.Column="2" Content="Browse..."
                         Style="{StaticResource ActionButton}"
                         Margin="8,0,0,0"
