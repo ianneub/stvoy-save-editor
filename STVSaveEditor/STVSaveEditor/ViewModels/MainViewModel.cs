@@ -17,6 +17,9 @@ public class MainViewModel : INotifyPropertyChanged
     private string _statusMessage = "Ready";
     private float _hullIntegrity;
     private float _hullMax = 490f;
+    private int _currentMorale;
+    private int _originalMorale;
+    private int _moraleMax;
     private byte[]? _currentData;
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -57,6 +60,22 @@ public class MainViewModel : INotifyPropertyChanged
     {
         get => _hullIntegrity;
         set { _hullIntegrity = value; OnPropertyChanged(); }
+    }
+
+    public int CurrentMorale
+    {
+        get => _currentMorale;
+        set 
+        { 
+            _currentMorale = Math.Min(value, _moraleMax); 
+            OnPropertyChanged(); 
+        }
+    }
+
+    public int MoraleMax
+    {
+        get => _moraleMax;
+        set { _moraleMax = value; OnPropertyChanged(); }
     }
 
     public float HullMax
@@ -104,17 +123,60 @@ public class MainViewModel : INotifyPropertyChanged
             var resources = ChunkNavigator.ReadResources(_currentData);
             BaseResources.Clear();
             Items.Clear();
+
+            var excludedResources = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "Energy", "Cycles", "CrewAssigned", "Happiness", "LivingSpace",
+                "WorkTeams", "WorkTeamsAssigned", "Batteries", "Hull", "ThreatLevel",
+                "Morale", "MoraleMax"
+            };
+
             foreach (var r in resources)
             {
+                if (r.Name == "Morale")
+                {
+                    _currentMorale = r.Quantity;
+                    _originalMorale = r.Quantity;
+                    OnPropertyChanged(nameof(CurrentMorale));
+                    continue;
+                }
+                if (r.Name == "MoraleMax")
+                {
+                    _moraleMax = r.Quantity;
+                    OnPropertyChanged(nameof(MoraleMax));
+                    continue;
+                }
+
+                if (!r.IsItem && excludedResources.Contains(r.Name))
+                    continue;
+
+                bool isTorpedo = r.Name == "Items.Item.Item_Torpedo";
+                string displayName = isTorpedo ? "TORPEDOES" : (r.IsItem ? r.Name.Replace("Items.Item.", "") : r.Name);
+
+                // Format specific names
+                if (displayName.Equals("BioNeuralGelPack", StringComparison.OrdinalIgnoreCase)) displayName = "BIO-NEURAL GEL PACK";
+                else if (displayName.Equals("SciencePoints", StringComparison.OrdinalIgnoreCase)) displayName = "SCIENCE POINTS";
+                else if (displayName.Equals("BorgNanites", StringComparison.OrdinalIgnoreCase)) displayName = "BORG NANITES";
+                
+                displayName = displayName.ToUpperInvariant();
+
+                bool isActuallyItem = r.IsItem && !isTorpedo;
+
                 var vm = new ResourceViewModel
                 {
                     Name = r.Name,
-                    DisplayName = r.IsItem ? r.Name.Replace("Items.Item.", "") : r.Name,
+                    DisplayName = displayName,
                     Quantity = r.Quantity,
                     NewQuantity = r.Quantity,
-                    IsItem = r.IsItem,
+                    IsItem = isActuallyItem,
                 };
-                if (r.IsItem)
+
+                if (r.Name == "Crew")
+                {
+                    vm.ToolTipText = "CREW COUNT IS YOUR TOTAL ACTIVE CREW MINUS YOUR HEROES. DO NOT INCREASE THIS NUMBER + HERO COUNT BEYOND YOUR CURRENT MAX CREW CAPACITY IN YOUR SAVE.";
+                }
+
+                if (isActuallyItem)
                     Items.Add(vm);
                 else
                     BaseResources.Add(vm);
@@ -123,11 +185,11 @@ public class MainViewModel : INotifyPropertyChanged
             var hull = ChunkNavigator.ReadHullIntegrity(_currentData);
             HullIntegrity = hull.Value;
 
-            StatusMessage = $"Loaded: {Path.GetFileName(SelectedFile)} ({resources.Count} resources)";
+            StatusMessage = $"LOADED: {Path.GetFileName(SelectedFile).ToUpperInvariant()} ({resources.Count} RESOURCES)";
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Error loading: {ex.Message}";
+            StatusMessage = $"ERROR LOADING: {ex.Message.ToUpperInvariant()}";
         }
     }
 
@@ -146,7 +208,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_currentData == null || string.IsNullOrEmpty(SelectedFile))
         {
-            StatusMessage = "No file loaded";
+            StatusMessage = "NO FILE LOADED";
             return;
         }
 
@@ -161,6 +223,11 @@ public class MainViewModel : INotifyPropertyChanged
                     mods[r.Name] = r.NewQuantity;
             }
 
+            if (CurrentMorale != _originalMorale)
+            {
+                mods["Morale"] = CurrentMorale;
+            }
+
             byte[] data = _currentData;
 
             if (mods.Count > 0)
@@ -171,14 +238,14 @@ public class MainViewModel : INotifyPropertyChanged
                 ChunkNavigator.SetHullIntegrity(data, HullIntegrity);
 
             SaveFile.Save(data, SelectedFile);
-            StatusMessage = $"Saved successfully! ({mods.Count} resources modified)";
+            StatusMessage = $"SAVED SUCCESSFULLY! ({mods.Count} RESOURCES MODIFIED)";
 
             _currentData = data;
             LoadSaveFile();
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Error saving: {ex.Message}";
+            StatusMessage = $"ERROR SAVING: {ex.Message.ToUpperInvariant()}";
         }
     }
 
@@ -204,6 +271,8 @@ public class ResourceViewModel : INotifyPropertyChanged
     }
     public bool IsModified => NewQuantity != Quantity;
     public bool IsItem { get; set; }
+    public string ToolTipText { get; set; } = "";
+    public bool HasToolTip => !string.IsNullOrEmpty(ToolTipText);
 
     public event PropertyChangedEventHandler? PropertyChanged;
 }

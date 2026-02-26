@@ -1,2 +1,15 @@
 original/
 docs/
+
+# .NET Build Artifacts
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test Data
+test-save/
+STVSaveEditor/TestConsole/
